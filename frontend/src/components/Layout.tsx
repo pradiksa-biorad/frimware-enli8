@@ -1,7 +1,6 @@
-import { Outlet, Link, useNavigate, NavLink } from 'react-router-dom';
+import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import api from '../api/client';
-import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 
 interface Product { id: number; name: string; slug: string }
