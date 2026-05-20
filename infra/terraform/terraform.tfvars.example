@@ -1,0 +1,15 @@
+# Copy this file to terraform.tfvars and fill in the values.
+# terraform.tfvars is gitignored — never commit it.
+
+aws_region  = "ap-south-2"
+ses_region  = "ap-south-1"    # SES not yet available in ap-south-2; Mumbai is closest
+aws_profile = ""               # leave empty to use default profile / env vars
+
+app_name    = "firmware-hub"
+environment = "production"
+
+# Must be globally unique — recommend: firmware-hub-<account_id>-<region>
+bucket_name = "firmware-hub-183408292189-ap-south-2"
+
+ses_from_email = "noreply@yourdomain.com"   # must be verified in SES
+app_url        = "https://yourdomain.com"

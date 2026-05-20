@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(100)
+  slug         String        @unique @db.VarChar(100)
+  createdAt    DateTime      @default(now())
+  environments Environment[]
+}
+
+model Environment {
+  id        Int       @id @default(autoincrement())
+  productId Int
+  name      String    @db.VarChar(20) // dev | qa | production
+  createdAt DateTime  @default(now())
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  releases  Release[]
+
+  @@unique([productId, name])
+}
+
+model Release {
+  id            Int         @id @default(autoincrement())
+  environmentId Int
+  version       String      @db.VarChar(50)
+  releaseNotes  String      @db.Text
+  s3Key         String      @db.VarChar(500)
+  fileName      String      @db.VarChar(255)
+  fileSize      BigInt?
+  status        ReleaseStatus @default(PENDING)
+  uploadedById  Int
+  createdAt     DateTime    @default(now())
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  uploadedBy    User        @relation(fields: [uploadedById], references: [id])
+
+  @@unique([environmentId, version])
+}
+
+enum ReleaseStatus {
+  PENDING
+  CONFIRMED
+}
+
+model User {
+  id               Int             @id @default(autoincrement())
+  email            String          @unique @db.VarChar(255)
+  passwordHash     String?         @db.VarChar(255)
+  name             String          @db.VarChar(100)
+  role             UserRole        @default(VIEWER)
+  status           UserStatus      @default(PENDING)
+  invitedById      Int?
+  createdAt        DateTime        @default(now())
+  invitedBy        User?           @relation("InvitedBy", fields: [invitedById], references: [id])
+  invitedUsers     User[]          @relation("InvitedBy")
+  releases         Release[]
+  sentInvitations  Invitation[]
+  passwordResets   PasswordReset[]
+}
+
+enum UserRole {
+  ADMIN
+  VIEWER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+}
+
+model Invitation {
+  id          Int      @id @default(autoincrement())
+  email       String   @db.VarChar(255)
+  tokenHash   String   @unique @db.VarChar(255)
+  invitedById Int
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime @default(now())
+  invitedBy   User     @relation(fields: [invitedById], references: [id])
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  tokenHash String   @unique @db.VarChar(255)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

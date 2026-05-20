@@ -1,0 +1,8 @@
+# Local development overrides — exposes MySQL to the host for running
+# backend/frontend outside Docker (hot-reload dev servers).
+# This file is picked up automatically by `docker compose` alongside docker-compose.yml.
+
+services:
+  db:
+    ports:
+      - "3307:3306"
